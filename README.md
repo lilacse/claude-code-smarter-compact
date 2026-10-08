@@ -31,6 +31,9 @@ In a Claude Code terminal session:
 - `/compact` 
   - Anything you type after the command is passed to Claude as instructions that take 
     priority, and carried into the ones it writes.
+  - Although, personally, I don't recommend adding additional instructions. Claude is
+    usually smart enough to figure it out. Only add them if you find Claude still
+    dropping context that you wish to keep. 
 - Auto-compaction 
 
 Subagents are not covered.
