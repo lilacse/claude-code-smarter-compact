@@ -1,0 +1,16 @@
+{
+  "name": "smarter-compact",
+  "version": "0.1.0",
+  "description": "Before /compact and auto-compaction, asks Claude, with the full conversation in view, what the summary must preserve, then compacts with that as the instructions.",
+  "author": { "name": "Lilacse" },
+  "repository": "https://github.com/lilacse/claude-code-smarter-compact",
+  "license": "MIT",
+  "userConfig": {
+    "showInstructions": {
+      "type": "boolean",
+      "title": "Show compaction instructions",
+      "description": "Print Claude's full instructions for the summarizer in the transcript. Off: one short line with their length.",
+      "default": false
+    }
+  }
+}

@@ -1,0 +1,2 @@
+# Type definitions Claude Code writes when it loads the plugin; specific to the local build.
+.claude-plugin/types/

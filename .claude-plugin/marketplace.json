@@ -1,0 +1,6 @@
+{
+  "name": "claude-code-smarter-compact",
+  "description": "smarter-compact: Claude writes the instructions for each compaction.",
+  "owner": { "name": "Lilacse" },
+  "plugins": [{ "name": "smarter-compact", "source": "./" }]
+}
