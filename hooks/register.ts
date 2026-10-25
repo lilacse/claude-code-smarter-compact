@@ -1,4 +1,4 @@
-import type { EngineInterface, Register } from 'claude-code'
+import type { EngineInterface, Register, SessionMessage } from 'claude-code'
 
 // Takes over compaction's instructions: before the summarizer runs, the
 // session's own model is asked (over a fork of this very conversation, so it
@@ -92,13 +92,22 @@ const askForInstructions = async ($: EngineInterface, userArgs: string, showInst
   return instructions
 }
 
+// Whether `messages` still opens with every message of `over`, the transcript
+// a precompute ran over; any compaction since, ours or not, breaks it.
+export const stillHolds = (messages: readonly SessionMessage[], over: readonly SessionMessage[]): boolean =>
+  over.length > 0 &&
+  messages.length >= over.length &&
+  over.every((m, i) => messages[i].role === m.role && messages[i].text === m.text)
+
 export const register: Register = (on, options) => {
   // Off by default: the instructions are written for the summarizer, not for reading.
   const showInstructions = options.showInstructions === true
 
   // Instructions asked for by a precompute, reused by the auto-compaction that
-  // follows so the precomputed summary and the final one agree.
-  let precomputed: string | undefined
+  // follows so the precomputed summary and the final one agree. Kept with the
+  // transcript it ran over: a hook skipped on that auto-compaction (another
+  // plugin sent the event past ours) must not hand them to a later one.
+  let precomputed: { instructions: string; over: readonly SessionMessage[] } | undefined
 
   on('command.run', { command: 'compact' }, async ($, e, next) => {
     precomputed = undefined
@@ -115,10 +124,10 @@ export const register: Register = (on, options) => {
       // A subagent's own compaction: the fork would see the main thread, not it.
       if (e.agentId !== undefined) return next(e)
 
-      const reused = trigger === 'auto' ? precomputed : undefined
+      const reused = trigger === 'auto' && precomputed && stillHolds(e.messages, precomputed.over) ? precomputed.instructions : undefined
       if (reused !== undefined) $.ui.log('compacting with the instructions Claude wrote for the precomputed summary.')
       const instructions = reused ?? (await askForInstructions($, e.instructions ?? '', showInstructions))
-      precomputed = trigger === 'precompute' ? instructions : undefined
+      precomputed = trigger === 'precompute' && instructions !== undefined ? { instructions, over: e.messages } : undefined
 
       return next(instructions === undefined ? e : { ...e, instructions })
     }).catch(($, e, next) => {

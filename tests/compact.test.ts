@@ -110,6 +110,28 @@ test('auto-compaction reuses the instructions of the precompute before it', asyn
   expect(seen).toEqual(['round 1', 'round 1'])
 })
 
+test('a precompute\'s instructions are not reused once the conversation has been compacted past them', async ($, on) => {
+  let forks = 0
+  const seen: (string | undefined)[] = []
+  contextOf(on, 800_000)
+  on('model.fork', () => {
+    forks += 1
+    return answer(`<compact_instructions>round ${forks}</compact_instructions>`)
+  })
+  on('session.compact', (_$, e) => {
+    seen.push(e.instructions)
+    return { messages: e.messages }
+  })
+
+  await $.session.compact({ trigger: 'precompute', messages })
+  // The auto-compaction that followed never reached our hook; this is a later one.
+  const afterwards = [{ role: 'user' as const, text: 'Summary of the earlier conversation.', toolUses: [] }, ...messages]
+  await $.session.compact({ trigger: 'auto', messages: afterwards })
+
+  expect(forks).toBe(2)
+  expect(seen).toEqual(['round 1', 'round 2'])
+})
+
 test('a subagent\'s compaction is left alone', async ($, on) => {
   let forked = false
   contextOf(on, 100_000)
