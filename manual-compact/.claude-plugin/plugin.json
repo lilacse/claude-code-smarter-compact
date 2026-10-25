@@ -1,0 +1,8 @@
+{
+  "name": "manual-compact",
+  "version": "0.1.0",
+  "description": "A skill that has Claude write instructions for the next compaction and hands you a /compact command to run with them. No hooks, for setups where smarter-compact's hooks are skipped.",
+  "author": { "name": "Lilacse" },
+  "repository": "https://github.com/lilacse/claude-code-smarter-compact",
+  "license": "MIT"
+}

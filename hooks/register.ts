@@ -12,6 +12,7 @@ const TAG = 'compact_instructions'
 // reply, so it needs this much room left in the model's real context window.
 export const MIN_HEADROOM_TOKENS = 10_000
 
+// manual-compact/skills/prepare/SKILL.md asks the same question; keep the two in step.
 export const buildPrompt = (userArgs: string): string => {
   const userPart = userArgs.trim()
     ? `\n\nInstructions were given for this compaction (typed by the user after /compact, or set elsewhere); they take priority and must be carried into yours:\n<user_instructions>\n${userArgs.trim()}\n</user_instructions>`

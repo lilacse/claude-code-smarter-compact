@@ -43,6 +43,24 @@ This plugin fallbacks to normal compaction if the process fails for any reason. 
 - the question fails (API error, interrupted, nothing to ask about);
 - Claude returns no instructions.
 
+## When the hooks are skipped: manual-compact
+
+On some setups another plugin runs before this one and sends compaction past its hooks.
+For example, Claude Code's built-in `sec-default` plugin does this on Team and Enterprise
+plans and on machines with managed settings. The transcript then shows a line like
+`its session.compact hook was skipped`, and the compaction runs with the default instructions.
+
+`manual-compact` is a separate plugin from this marketplace with no hooks, only a skill:
+
+```
+/plugin install manual-compact --marketplace lilacse/claude-code-smarter-compact
+```
+
+Run `/manual-compact:prepare`, optionally followed by what the summary must keep. Claude
+replies with a ready-made `/compact ...` command holding its instructions; copy it into the
+prompt and run it. If smarter-compact's `/compact` hook still works on that setup, it will
+also ask Claude again, with the pasted instructions taking priority.
+
 ## Options
 
 | Option | Default | Effect |
