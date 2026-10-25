@@ -64,30 +64,30 @@ const askForInstructions = async ($: EngineInterface, userArgs: string, showInst
   const { context } = await $.session.usage()
   const room = context.tokens === undefined ? undefined : context.window - context.tokens
   if (room !== undefined && room < MIN_HEADROOM_TOKENS) {
-    $.ui.log(`smarter-compact: only ${room} tokens left in the context window; compacting without Claude's instructions.`)
+    $.ui.log(`only ${room} tokens left in the context window; compacting without Claude's instructions.`)
     return undefined
   }
 
-  $.ui.status('smarter-compact: asking Claude what to preserve...')
+  $.ui.status('asking Claude what to preserve...')
   const reply = await $.model.fork({ prompt: buildPrompt(userArgs) }).finally(() => $.ui.status(undefined))
 
   if (!reply.isAnswered) {
     const why = reply.reason === 'api-error' ? `api-error ${reply.status ?? ''} ${reply.error}` : reply.reason
-    $.ui.log(`smarter-compact: no instructions from Claude (${why.trim()}); compacting as usual.`)
+    $.ui.log(`no instructions from Claude (${why.trim()}); compacting as usual.`)
     return undefined
   }
 
   const instructions = extractInstructions(reply.text)
   if (!instructions) {
-    $.ui.log('smarter-compact: Claude returned empty instructions; compacting as usual.')
+    $.ui.log('Claude returned empty instructions; compacting as usual.')
     return undefined
   }
 
   if (showInstructions) {
-    for (const line of splitForLog(`smarter-compact: compacting with Claude's instructions:\n${instructions}`)) $.ui.log(line)
+    for (const line of splitForLog(`compacting with Claude's instructions:\n${instructions}`)) $.ui.log(line)
   } else {
     const words = instructions.split(/\s+/).length
-    $.ui.log(`smarter-compact: compacting with Claude's instructions (${words} words).`)
+    $.ui.log(`compacting with Claude's instructions (${words} words).`)
   }
   return instructions
 }
@@ -106,7 +106,7 @@ export const register: Register = (on, options) => {
     return next(instructions === undefined ? e : { ...e, args: instructions })
   }).catch(($, e, next) => {
     // `next` is replay-safe: if the compaction already ran, this returns its result.
-    if (!next.called) $.ui.log('smarter-compact: its hook failed; running /compact as typed.')
+    if (!next.called) $.ui.log('its hook failed; running /compact as typed.')
     return next(e)
   })
 
@@ -116,13 +116,13 @@ export const register: Register = (on, options) => {
       if (e.agentId !== undefined) return next(e)
 
       const reused = trigger === 'auto' ? precomputed : undefined
-      if (reused !== undefined) $.ui.log('smarter-compact: compacting with the instructions Claude wrote for the precomputed summary.')
+      if (reused !== undefined) $.ui.log('compacting with the instructions Claude wrote for the precomputed summary.')
       const instructions = reused ?? (await askForInstructions($, e.instructions ?? '', showInstructions))
       precomputed = trigger === 'precompute' ? instructions : undefined
 
       return next(instructions === undefined ? e : { ...e, instructions })
     }).catch(($, e, next) => {
-      if (!next.called) $.ui.log(`smarter-compact: its ${trigger} hook failed; compacting as usual.`)
+      if (!next.called) $.ui.log(`its ${trigger} hook failed; compacting as usual.`)
       return next(e)
     })
   }

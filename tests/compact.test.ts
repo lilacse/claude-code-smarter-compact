@@ -137,10 +137,10 @@ test('shown instructions are logged whole over lines the terminal draws in full'
 
   await $.session.compact({ trigger: 'auto', messages })
 
-  const lines = logged.filter(l => !l.startsWith('smarter-compact: only'))
+  const lines = logged.filter(l => !l.startsWith('only'))
   expect(lines.length).toBeGreaterThan(1)
   for (const line of lines) expect(line.length).toBeLessThanOrEqual(2000)
-  expect(lines.join('\n')).toBe(`smarter-compact: compacting with Claude's instructions:\n${long}`)
+  expect(lines.join('\n')).toBe(`compacting with Claude's instructions:\n${long}`)
 })
 
 test('splitForLog breaks at spaces when a line has no line break', () => {
@@ -161,5 +161,5 @@ test('instructions are hidden by default, leaving a one-line note', async ($, on
 
   await $.session.compact({ trigger: 'auto', messages })
 
-  expect(logged).toEqual(['smarter-compact: compacting with Claude\'s instructions (8 words).'])
+  expect(logged).toEqual(['compacting with Claude\'s instructions (8 words).'])
 })
